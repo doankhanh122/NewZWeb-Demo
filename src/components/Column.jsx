@@ -1,46 +1,48 @@
-import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { useDroppable } from '@dnd-kit/core';
-import { addTask } from '../store/tasksSlice';
-import TaskCard from './TaskCard';
-import CreateTaskModal from './CreateTaskModal';
-import { Card, CardContent, Typography, Button } from '@mui/material';
+import React, { useState } from "react";
+import { useDroppable } from "@dnd-kit/core";
+import { Card, CardContent, Typography, Button } from "@mui/material";
+import TaskCard from "./TaskCard";
+import CreateTaskModal from "./CreateTaskModal";
 
-const Column = ({ columnId }) => {
-  const column = useSelector((state) => state.tasks.columns[columnId]);
-  const dispatch = useDispatch();
-  const { setNodeRef } = useDroppable({ id: columnId });
-  const [isModalOpen, setModalOpen] = useState(false);
+const Column = ({ column }) => {
+  const { id, title, tasks, color } = column;
+  const { setNodeRef } = useDroppable({ id });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleOpenModal = () => setModalOpen(true);
-  const handleCloseModal = () => setModalOpen(false);
-
-  const handleCreateTask = (taskName) => {
-    dispatch(addTask({ columnId, taskName }));
-  };
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
 
   return (
-    <Card variant="outlined" style={{ width: 300 }}>
+    <Card
+      variant="outlined"
+      style={{
+        width: 300,
+        backgroundColor: color,
+        color: "white",
+        borderRadius: "8px",
+        boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+      }}
+    >
       <CardContent ref={setNodeRef}>
-        <Typography variant="h6" gutterBottom>
-          {column.title}
+        <Typography variant="h6" style={{ marginBottom: "16px", fontWeight: "bold" }}>
+          {title}
         </Typography>
-        {column.tasks.map((task) => (
-          <TaskCard key={task} id={task} />
+        {tasks.map((task) => (
+          <TaskCard key={task.id} task={task} columnId={id} />
         ))}
         <Button
           variant="contained"
-          color="primary"
           onClick={handleOpenModal}
-          style={{ marginTop: '16px' }}
+          style={{
+            marginTop: "16px",
+            backgroundColor: "white",
+            color: color,
+            fontWeight: "bold",
+          }}
         >
-          Create Task
+          +
         </Button>
-        <CreateTaskModal
-          open={isModalOpen}
-          onClose={handleCloseModal}
-          onCreate={handleCreateTask}
-        />
+        <CreateTaskModal open={isModalOpen} onClose={handleCloseModal} columnId={id} />
       </CardContent>
     </Card>
   );

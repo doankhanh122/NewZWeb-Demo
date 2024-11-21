@@ -1,48 +1,77 @@
-import React, { useState } from 'react';
-import { Modal, Box, Button, TextField } from '@mui/material';
+import React, { useState } from "react";
+import { Modal, Box, TextField, Button, Stack } from "@mui/material";
+import { useDispatch } from "react-redux";
+import { addTask } from "../store/tasksSlice";
 
-const CreateTaskModal = ({ open, onClose, onCreate }) => {
-  const [taskName, setTaskName] = useState('');
+const modalStyle = {
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)",
+  width: 400,
+  bgcolor: "background.paper",
+  border: "2px solid #000",
+  boxShadow: 24,
+  p: 4,
+};
 
-  const handleCreate = () => {
-    if (taskName.trim()) {
-      onCreate(taskName);
-      setTaskName('');
+const CreateTaskModal = ({ open, onClose, columnId }) => {
+  const [title, setTitle] = useState("");
+  const [label, setLabel] = useState("");
+  const dispatch = useDispatch();
+
+  const handleSubmit = () => {
+    if (title.trim()) {
+      dispatch(
+        addTask({
+          columnId,
+          task: {
+            id: Date.now(),
+            title,
+            label,
+          },
+        })
+      );
+      setTitle("");
+      setLabel("");
       onClose();
     }
   };
 
+  const handleCancel = () => {
+    setTitle("");
+    setLabel("");
+    onClose();
+  };
+
   return (
-    <Modal open={open} onClose={onClose}>
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: 400,
-          bgcolor: 'background.paper',
-          p: 4,
-          borderRadius: 2,
-          boxShadow: 24,
-        }}
-      >
+    <Modal open={open} onClose={handleCancel}>
+      <Box sx={modalStyle}>
+        <h2>Tạo Task Mới</h2>
         <TextField
-          label="Task Name"
+          label="Tiêu đề"
           variant="outlined"
           fullWidth
-          value={taskName}
-          onChange={(e) => setTaskName(e.target.value)}
-          autoFocus
+          margin="normal"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
         />
-        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-          <Button onClick={onClose} variant="outlined">
-            Cancel
+        <TextField
+          label="Nhãn"
+          variant="outlined"
+          fullWidth
+          margin="normal"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+        />
+        <Stack direction="row" spacing={2} justifyContent="flex-end" style={{ marginTop: "16px" }}>
+          <Button variant="outlined" onClick={handleCancel}>
+            Hủy
           </Button>
-          <Button onClick={handleCreate} variant="contained">
-            Create
+          <Button variant="contained" onClick={handleSubmit}>
+            Tạo
           </Button>
-        </Box>
+        </Stack>
       </Box>
     </Modal>
   );
