@@ -1,27 +1,29 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+const initialState = {
+  columns: {
+    todo: { id: 'todo', title: 'To Do', tasks: ['Task 1', 'Task 2'] },
+    inProgress: { id: 'inProgress', title: 'In Progress', tasks: ['Task 3'] },
+    done: { id: 'done', title: 'Done', tasks: ['Task 4', 'Task 5'] },
+  },
+};
+
 const tasksSlice = createSlice({
   name: 'tasks',
-  initialState: {
-    columns: {
-      todo: [
-        { id: '1', title: 'Task 1' },
-        { id: '2', title: 'Task 2' },
-      ],
-      inProgress: [],
-      done: [],
-    },
-  },
+  initialState,
   reducers: {
     addTask: (state, action) => {
-      const { column, task } = action.payload;
-      state.columns[column].push(task);
+      const { columnId, taskName } = action.payload;
+      state.columns[columnId].tasks.push(taskName);
     },
     moveTask: (state, action) => {
-      const { fromColumn, toColumn, taskId } = action.payload;
-      const taskIndex = state.columns[fromColumn].findIndex((task) => task.id === taskId);
-      const [task] = state.columns[fromColumn].splice(taskIndex, 1);
-      state.columns[toColumn].push(task);
+      const { taskId, sourceColumnId, targetColumnId } = action.payload;
+
+      state.columns[sourceColumnId].tasks = state.columns[sourceColumnId].tasks.filter(
+        (task) => task !== taskId
+      );
+
+      state.columns[targetColumnId].tasks.push(taskId);
     },
   },
 });

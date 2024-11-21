@@ -1,31 +1,42 @@
-import  
- store  from './store';
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
 import React from 'react';
-import { DndContext } from '@dnd-kit/core';
-import { Provider } from 'react-redux';
-// import { Store  } from './store';
+import { useDispatch, useSelector } from 'react-redux';
+import { DndContext, closestCenter } from '@dnd-kit/core';
+import { moveTask } from './store/tasksSlice';
 import Column from './components/Column';
-import CreateTaskModal from './components/CreateTaskModal';
-import './styles.css';
 
 const App = () => {
+  const columns = useSelector((state) => state.tasks.columns);
+  const dispatch = useDispatch();
+
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id) return;
+
+    const sourceColumnId = Object.keys(columns).find((id) =>
+      columns[id].tasks.includes(active.id)
+    );
+    const targetColumnId = over.id;
+
+    if (sourceColumnId && targetColumnId && sourceColumnId !== targetColumnId) {
+      dispatch(
+        moveTask({
+          taskId: active.id,
+          sourceColumnId,
+          targetColumnId,
+        })
+      );
+    }
+  };
+
   return (
-    <Provider store={store}>
-      <DndContext>
-        <div style={{ display: 'flex', justifyContent: 'space-between', padding: '20px' }}>
-          <Column id="todo" title="To Do" />
-          <div>
-            <Column id="inProgress" title="In Progress" />
-            <CreateTaskModal />
-          </div>
-          <Column id="done" title="Done" />
-        </div>
-      </DndContext>
-    </Provider>
+    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+      <div style={{ display: 'flex', gap: '16px', padding: '16px' }}>
+        {Object.keys(columns).map((columnId) => (
+          <Column key={columnId} columnId={columnId} />
+        ))}
+      </div>
+    </DndContext>
   );
 };
 

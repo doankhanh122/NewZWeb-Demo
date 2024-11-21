@@ -1,50 +1,50 @@
 import React, { useState } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button } from '@mui/material';
-import { useDispatch } from 'react-redux';
-import { addTask } from '../store/tasksSlice'; // Action để thêm task
+import { Modal, Box, Button, TextField } from '@mui/material';
 
-const CreateTaskModal = ({ open, handleClose, columnId }) => {
-  const [taskTitle, setTaskTitle] = useState(''); // Quản lý tiêu đề task
-  const dispatch = useDispatch(); // Để dispatch action vào Redux store
+const CreateTaskModal = ({ open, onClose, onCreate }) => {
+  const [taskName, setTaskName] = useState('');
 
-  // Xử lý thay đổi input
-  const handleChange = (event) => {
-    setTaskTitle(event.target.value);
-  };
-
-  // Xử lý tạo task mới
-  const handleCreateTask = () => {
-    if (taskTitle.trim() !== '') {
-      // Tạo task mới và dispatch action thêm task vào cột tương ứng
-      dispatch(addTask({ column: columnId, task: { id: Date.now().toString(), title: taskTitle } }));
-      setTaskTitle(''); // Reset input sau khi tạo task
-      handleClose(); // Đóng modal
+  const handleCreate = () => {
+    if (taskName.trim()) {
+      onCreate(taskName);
+      setTaskName('');
+      onClose();
     }
   };
 
   return (
-    <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Create New Task</DialogTitle>
-      <DialogContent>
+    <Modal open={open} onClose={onClose}>
+      <Box
+        sx={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          width: 400,
+          bgcolor: 'background.paper',
+          p: 4,
+          borderRadius: 2,
+          boxShadow: 24,
+        }}
+      >
         <TextField
-          autoFocus
-          margin="dense"
-          label="Task Title"
-          fullWidth
+          label="Task Name"
           variant="outlined"
-          value={taskTitle}
-          onChange={handleChange}
+          fullWidth
+          value={taskName}
+          onChange={(e) => setTaskName(e.target.value)}
+          autoFocus
         />
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose} color="secondary">
-          Cancel
-        </Button>
-        <Button onClick={handleCreateTask} color="primary">
-          Create Task
-        </Button>
-      </DialogActions>
-    </Dialog>
+        <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+          <Button onClick={onClose} variant="outlined">
+            Cancel
+          </Button>
+          <Button onClick={handleCreate} variant="contained">
+            Create
+          </Button>
+        </Box>
+      </Box>
+    </Modal>
   );
 };
 

@@ -1,14 +1,28 @@
-
-
 import React from 'react';
+import { useDraggable } from '@dnd-kit/core';
+import { Paper, Typography } from '@mui/material';
 
-const TaskCard = ({ task }) => {
+const TaskCard = ({ id }) => {
+  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id });
+
+  const style = {
+    transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined,
+    opacity: isDragging ? 0.5 : 1,
+    marginBottom: '8px',
+    padding: '8px',
+    backgroundColor: '#f5f5f5',
+    border: '1px solid #ddd',
+    borderRadius: '4px',
+    cursor: 'grab',
+  };
+
   return (
-    <div style={{ padding: '10px', margin: '5px 0', backgroundColor: '#f4f4f4', borderRadius: '5px' }}>
-      {task.title}
-    </div>
+    <Paper ref={setNodeRef} style={style} {...attributes} {...listeners}>
+      <Typography>{id}</Typography>
+    </Paper>
   );
 };
 
 export default TaskCard;
+
 

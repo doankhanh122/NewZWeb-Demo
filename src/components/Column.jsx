@@ -1,39 +1,48 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useDroppable } from '@dnd-kit/core';
-import CreateTaskModal from './CreateTaskModal'; // Import CreateTaskModal
+import { addTask } from '../store/tasksSlice';
 import TaskCard from './TaskCard';
+import CreateTaskModal from './CreateTaskModal';
+import { Card, CardContent, Typography, Button } from '@mui/material';
 
-const Column = ({ id, title }) => {
-  const { setNodeRef } = useDroppable({ id });
-  const tasks = useSelector((state) => state.tasks.columns[id]);
-  
-  // State để điều khiển hiển thị modal
-  const [openModal, setOpenModal] = useState(false);
+const Column = ({ columnId }) => {
+  const column = useSelector((state) => state.tasks.columns[columnId]);
+  const dispatch = useDispatch();
+  const { setNodeRef } = useDroppable({ id: columnId });
+  const [isModalOpen, setModalOpen] = useState(false);
 
-  // Mở modal
-  const handleOpenModal = () => {
-    setOpenModal(true);
-  };
+  const handleOpenModal = () => setModalOpen(true);
+  const handleCloseModal = () => setModalOpen(false);
 
-  // Đóng modal
-  const handleCloseModal = () => {
-    setOpenModal(false);
+  const handleCreateTask = (taskName) => {
+    dispatch(addTask({ columnId, taskName }));
   };
 
   return (
-    <div ref={setNodeRef} style={{ padding: '20px', width: '30%', border: '1px solid #ccc' }}>
-      <h3>{title}</h3>
-      {tasks?.map((task) => (
-        <TaskCard key={task.id} task={task} />
-      ))}
-      
-      {/* Nút để mở CreateTaskModal */}
-      <button onClick={handleOpenModal}>Create Task</button>
-      
-      {/* Hiển thị modal khi openModal là true */}
-      <CreateTaskModal open={openModal} handleClose={handleCloseModal} columnId={id} />
-    </div>
+    <Card variant="outlined" style={{ width: 300 }}>
+      <CardContent ref={setNodeRef}>
+        <Typography variant="h6" gutterBottom>
+          {column.title}
+        </Typography>
+        {column.tasks.map((task) => (
+          <TaskCard key={task} id={task} />
+        ))}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleOpenModal}
+          style={{ marginTop: '16px' }}
+        >
+          Create Task
+        </Button>
+        <CreateTaskModal
+          open={isModalOpen}
+          onClose={handleCloseModal}
+          onCreate={handleCreateTask}
+        />
+      </CardContent>
+    </Card>
   );
 };
 
