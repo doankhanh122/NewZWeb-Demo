@@ -16,7 +16,7 @@ const Column = ({ column, subCards, onAddSubCard }) => {
       alignItems: 'center',
       height: '80vh', // Fixed height
       overflowY: 'auto', // Enable vertical scrolling
-      position: 'relative', // Ensure columns are positioned in a stacking context
+      // position: 'relative', // Ensure columns are positioned in a stacking context
       zIndex: 1000 , // Bring it to the front when dragging
     }}>
       <h2>{column.name}</h2>

@@ -1,6 +1,6 @@
 // App.jsx
 import React, { useState } from 'react';
-import { DndContext } from '@dnd-kit/core';
+import { DndContext , DragOverlay  } from '@dnd-kit/core';
 import Column from './components/Column';
 import { useDraggable } from '@dnd-kit/core';
 
@@ -35,7 +35,7 @@ const initialData = {
       cards: {
         'card-4': {
           id: 'card-4',
-          name: 'Todo',
+          name: 'Done',
           subCards: ['sub-7', 'sub-8'],
         },
         'card-5': {
@@ -45,7 +45,7 @@ const initialData = {
         },
         'card-6': {
           id: 'card-6',
-          name: 'Done',
+          name: 'To do',
           subCards: ['sub-11', 'sub-12'],
         },
       },
@@ -147,11 +147,11 @@ const App = () => {
   
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', transform: transform
+      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex: 1000, transform: transform
       ? `translate(${transform.x}px, ${transform.y}px)`
       : undefined,}}>
         {Object.values(data.columns).map((column) => (
-          <Column
+          <Column 
             key={column.id}
             column={column}
             subCards={data.subCards}
