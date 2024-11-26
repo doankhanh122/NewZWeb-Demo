@@ -1,6 +1,7 @@
 import React from 'react';
 import Card from './Card';
 import AddSubCard from './AddSubCard'; // Import the AddSubCard component
+import { useDraggable } from '@dnd-kit/core';
 
 const Column = ({ column, subCards, onAddSubCard }) => {
   return (
@@ -16,8 +17,8 @@ const Column = ({ column, subCards, onAddSubCard }) => {
       height: '80vh', // Fixed height
       overflowY: 'auto', // Enable vertical scrolling
       position: 'relative', // Ensure columns are positioned in a stacking context
-      zIndex: 0, // Default z-index for layout container
-       }}>
+      zIndex: 1000 , // Bring it to the front when dragging
+    }}>
       <h2>{column.name}</h2>
       {Object.values(column.cards).map((card) => (
         <Card

@@ -147,7 +147,9 @@ const App = () => {
   
   return (
     <DndContext onDragEnd={handleDragEnd}>
-      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex: isDragging ? 1000 : 'auto',}}>
+      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', transform: transform
+      ? `translate(${transform.x}px, ${transform.y}px)`
+      : undefined,}}>
         {Object.values(data.columns).map((column) => (
           <Column
             key={column.id}
