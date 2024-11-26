@@ -1,47 +1,41 @@
-import React from "react";
-import { useSelector, useDispatch } from "react-redux";
-import { DndContext, closestCenter } from "@dnd-kit/core";
-import { arrayMove, SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
-import Column from "./Column";
-import { moveTask } from "../store/tasksSlice";
+import React from 'react';
+import { Button, Grid } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import { addTaskCard, addSubtask } from '../store/tasksSlice';
+import Column from './Column';
 
 const Board = () => {
-  const columns = useSelector((state) => state.tasks.columns);
   const dispatch = useDispatch();
+  const columns = useSelector(state => state.tasks.columns);
+  const taskCards = useSelector(state => state.tasks.taskCards);
+  const subtasks = useSelector(state => state.tasks.subtasks);
 
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-
-    if (!over) return;
-
-    const [fromColumnId, taskId] = active.id.split("-");
-    const [toColumnId] = over.id.split("-");
-
-    if (fromColumnId !== toColumnId) {
-      dispatch(
-        moveTask({
-          fromColumnId,
-          toColumnId,
-          taskId: parseInt(taskId, 10),
-        })
-      );
-    }
+  const handleCreateSubtask = () => {
+    const newSubtaskId = `subtask-${Object.keys(subtasks).length + 1}`;
+    const newSubtask = {
+      id: newSubtaskId,
+      title: 'New Subtask',
+      taskCardId: 'taskCard-2', // Default to middle task card
+    };
+    dispatch(addSubtask(newSubtask));
   };
 
   return (
-    <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div style={{ display: "flex", gap: "20px", justifyContent: "center" }}>
-        {Object.values(columns).map((column) => (
-          <SortableContext
-            key={column.id}
-            items={column.tasks.map((task) => `${column.id}-${task.id}`)}
-            strategy={verticalListSortingStrategy}
-          >
-            <Column column={column} />
-          </SortableContext>
-        ))}
-      </div>
-    </DndContext>
+    <Grid container spacing={2} sx={{ padding: 2 }}>
+      {Object.values(columns).map((column) => (
+        <Column
+          key={column.id}
+          column={column}
+          taskCards={column.taskCardIds.map((taskCardId) => taskCards[taskCardId])}
+          subtasks={subtasks}
+        />
+      ))}
+      <Grid item xs={4} sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <Button variant="contained" onClick={handleCreateSubtask}>
+          Create Subtask
+        </Button>
+      </Grid>
+    </Grid>
   );
 };
 

@@ -1,57 +1,78 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice } from '@reduxjs/toolkit';
+
+const initialState = {
+  columns: {
+    'giaoViec': {
+      id: 'giaoViec',
+      name: 'Giao Việc',
+      cards: {
+        'card-1': {
+          id: 'card-1',
+          name: 'ThuyTT',
+          subCards: ['sub-1', 'sub-2'],
+        },
+        'card-2': {
+          id: 'card-2',
+          name: 'HangTTT',
+          subCards: ['sub-3'],
+        },
+      },
+    },
+    'viecCuaToi': {
+      id: 'viecCuaToi',
+      name: 'Việc Của Tôi',
+      cards: {
+        'card-3': {
+          id: 'card-3',
+          name: 'Todo',
+          subCards: ['sub-4'],
+        },
+      },
+    },
+    xinYKien: [
+      { id: 'Trình Tổng Giám Đốc', subcards: [] },
+      { id: 'Trình Trưởng Phòng', subcards: [] },
+      { id: 'Trình Chủ Tịch', subcards: [] },
+    ],
+  },
+  subCards: {
+    'sub-1': { id: 'sub-1', content: 'Task 1' },
+    'sub-2': { id: 'sub-2', content: 'Task 2' },
+    'sub-3': { id: 'sub-3', content: 'Task 3' },
+    'sub-4': { id: 'sub-4', content: 'Task 4' },
+  },
+};
+
 
 const tasksSlice = createSlice({
-  name: "tasks",
-  initialState: {
-    columns: {
-      assignWork: {
-        id: "assignWork",
-        title: "Giao việc",
-        color: "green",
-        tasks: [
-          { id: 1, title: "ThuyTTT", label: "" },
-          { id: 2, title: "QuanhND", label: "" },
-          { id: 3, title: "KhoaMPN", label: "" },
-        ],
-      },
-      myWork: {
-        id: "myWork",
-        title: "Việc của tôi",
-        color: "orange",
-        tasks: [
-          { id: 4, title: "To-do", label: "" },
-          { id: 5, title: "In Progress", label: "" },
-          { id: 6, title: "Done", label: "" },
-        ],
-      },
-      feedback: {
-        id: "feedback",
-        title: "Xin ý kiến",
-        color: "red",
-        tasks: [
-          { id: 7, title: "Trình Giám Đốc", label: "" },
-          { id: 8, title: "Phòng DVKH", label: "" },
-          { id: 9, title: "Phòng Đối Đác Tháng", label: "" },
-        ],
-      },
-    },
-  },
+  name: 'tasks',
+  initialState,
   reducers: {
-    addTask: (state, action) => {
-      const { columnId, task } = action.payload;
-      state.columns[columnId].tasks.push(task);
+    addSubcard(state, action) {
+      const { columnId, cardId, subcard } = action.payload;
+      state.columns[columnId].find(card => card.id === cardId).subcards.push(subcard);
     },
-    moveTask: (state, action) => {
-      const { fromColumnId, toColumnId, taskId } = action.payload;
-      const fromColumn = state.columns[fromColumnId];
-      const toColumn = state.columns[toColumnId];
+    moveSubcard: (state, action) => {
+      const { sourceColumnId, sourceCardId, targetColumnId, targetCardId, subcardId } = action.payload;
 
-      const taskIndex = fromColumn.tasks.findIndex((task) => task.id === taskId);
-      const [movedTask] = fromColumn.tasks.splice(taskIndex, 1);
-      toColumn.tasks.push(movedTask);
+      // Find source and target cards
+      const sourceColumn = state.columns[sourceColumnId];
+      const targetColumn = state.columns[targetColumnId];
+      const sourceCard = sourceColumn.find(card => card.id === sourceCardId);
+      const targetCard = targetColumn.find(card => card.id === targetCardId);
+
+      // Find the subcard
+      const subcardIndex = sourceCard.subcards.findIndex(subcard => subcard.id === subcardId);
+      const subcard = sourceCard.subcards[subcardIndex];
+
+      // Remove the subcard from the source card
+      sourceCard.subcards.splice(subcardIndex, 1);
+
+      // Add the subcard to the target card
+      targetCard.subcards.push(subcard);
     },
   },
 });
 
-export const { addTask, moveTask } = tasksSlice.actions;
+export const { addSubcard, moveSubcard } = tasksSlice.actions;
 export default tasksSlice.reducer;
