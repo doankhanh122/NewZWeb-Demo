@@ -23,6 +23,7 @@ const Card = ({ card, subCards, onAddSubCard, isLastCard }) => {
         marginBottom: '16px',
         backgroundColor: '#fff',
         width: '500px',
+        // width: '500px',
       }}
     >
       <h3 style={{ marginBottom: '8px' }}>{card.name}</h3>

@@ -9,7 +9,7 @@ const Column = ({ column, subCards, onAddSubCard }) => {
     <div style={{ flex: 1,
       backgroundColor: column.color,
       borderRadius: '8px',
-      width: '200px',
+      // minWidth: '200px',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',

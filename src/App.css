@@ -45,69 +45,29 @@ body {
   position: relative; /* Ensure elements with absolute positioning are relative to the body */
 }
 
-.column {
-  position: relative; /* Ensures the column is the reference point for absolute positioning */
-  padding: 10px;
-  border: 1px solid #ccc;
-  height: 500px;
-  overflow-y: auto;  /* To make columns scrollable */
-}
 
-/* Style for the dragged subcard */
-.dragging-subcard {
-  position: fixed;  /* Use 'fixed' to ensure it floats above everything */
-  pointer-events: none; /* Prevent the dragged element from blocking interactions */
-  background-color: #fff; /* Background color */
-  padding: 10px;
-  border: 1px solid #ccc; /* Add border to make the subcard stand out */
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15); /* Add a subtle shadow for the floating effect */
-  border-radius: 5px;
-  z-index: 9999; /* Make sure it stays on top */
-  transform: scale(1); /* Keep the size fixed */
-  transition: transform 0.1s ease-out; /* Smooth transition */
-}
+/* app.css */
 
-/* Optional: Apply a slight opacity to the subcard when it's being dragged */
-.dragging-subcard.is-dragging {
-  opacity: 0.8; /* Make the subcard slightly transparent */
-}
-
-/* Additional styling for the columns and cards */
-.column {
-  min-width: 300px;
-  max-width: 300px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  padding: 10px;
-  overflow-y: auto;
-  height: 100vh;
-  margin: 0 10px;
-}
-
-.column1 {
-  background-color: #007bff; /* Blue */
-}
-
-.column2 {
-  background-color: #f1c40f; /* Yellow */
-}
-
-.column3 {
-  background-color: #e74c3c; /* Red */
-}
-
-.card {
-  background-color: #fff;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 10px;
-  padding: 10px;
-}
-
+/* Styles for subcards during drag */
 .subcard {
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  padding: 8px;
-  margin: 5px 0;
+  background: #f9f9f9;
+  border: 1px solid #ccc;
   border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 8px;
+  text-align: center;
+  cursor: grab;
+  transition: transform 0.3s ease;
 }
+
+.subcard.is-dragging {
+  background: #e0f7fa;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+}
+
+.subcard.hovered {
+  background-color: #d1e7ff;
+}
+
+/* Optionally add more styles */

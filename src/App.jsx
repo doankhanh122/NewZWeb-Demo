@@ -1,10 +1,10 @@
 // App.jsx
-import React, { useState } from 'react';
+import React, { useState , useRef, useEffect} from 'react';
 import { DndContext , DragOverlay   } from '@dnd-kit/core';
 import Column from './components/Column';
 import { useDraggable } from '@dnd-kit/core';
 import { moveSubcard } from './store/tasksSlice';
- 
+
 const initialData = {
   columns: {
     'column-1': {
@@ -102,6 +102,9 @@ const App = () => {
   const [activeSubcard, setActiveSubcard] = useState(null);
   const [draggingSubcard, setDraggingSubcard] = useState(null);
 
+  const containerNodeRef = useRef(null);
+  const cursorRef = useRef(null)
+
   const handleDragStart = (event) => {
     const { active } = event;
     setActiveSubcard(active.data.current);
@@ -116,7 +119,7 @@ const App = () => {
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
-
+    
     let sourceCardId, targetCardId;
 
     Object.values(data.columns).forEach((column) => {
@@ -163,11 +166,11 @@ const App = () => {
       return updatedData;
     });
   };
-  
-  
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex:1}}>
+    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} options={{ enableTouchEvents: false, enableMouseEvents: true }}>
+      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex:1, width: window.innerWidth, 
+        height: window.innerHeight}}       >
+                
         {Object.values(data.columns).map((column) => (
           <Column style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex:1}}
             key={column.id}
@@ -177,14 +180,7 @@ const App = () => {
           />
         ))}
       </div>
-      <DragOverlay>
-        {draggingSubcard ? (
-          <div
-style={{ }}          >
-            {draggingSubcard.content}
-          </div>
-        ) : null}
-      </DragOverlay>
+      
     </DndContext>
   );
 };
