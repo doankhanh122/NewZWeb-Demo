@@ -53,24 +53,30 @@ const tasksSlice = createSlice({
       state.columns[columnId].find(card => card.id === cardId).subcards.push(subcard);
     },
     moveSubcard: (state, action) => {
-      const { sourceColumnId, sourceCardId, targetColumnId, targetCardId, subcardId } = action.payload;
-
-      // Find source and target cards
-      const sourceColumn = state.columns[sourceColumnId];
-      const targetColumn = state.columns[targetColumnId];
-      const sourceCard = sourceColumn.find(card => card.id === sourceCardId);
-      const targetCard = targetColumn.find(card => card.id === targetCardId);
-
-      // Find the subcard
-      const subcardIndex = sourceCard.subcards.findIndex(subcard => subcard.id === subcardId);
-      const subcard = sourceCard.subcards[subcardIndex];
-
+      const { sourceCardId, targetCardId, subcardId } = action.payload;
+    
+      // Locate the source and target cards in the state
+      const sourceCard = Object.values(state.columns)
+        .flatMap((column) => column.cards)
+        .find((card) => card.id === sourceCardId);
+    
+      const targetCard = Object.values(state.columns)
+        .flatMap((column) => column.cards)
+        .find((card) => card.id === targetCardId);
+    
+      // If the cards or subcard are not found, exit early
+      if (!sourceCard || !targetCard) return;
+    
+      const subcardIndex = sourceCard.subcards.findIndex((subcard) => subcard.id === subcardId);
+      if (subcardIndex === -1) return;
+    
       // Remove the subcard from the source card
-      sourceCard.subcards.splice(subcardIndex, 1);
-
+      const [subcard] = sourceCard.subcards.splice(subcardIndex, 1);
+    
       // Add the subcard to the target card
       targetCard.subcards.push(subcard);
     },
+    
   },
 });
 

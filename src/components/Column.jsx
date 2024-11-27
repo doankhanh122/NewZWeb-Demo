@@ -2,6 +2,7 @@ import React from 'react';
 import Card from './Card';
 import AddSubCard from './AddSubCard'; // Import the AddSubCard component
 import { useDraggable } from '@dnd-kit/core';
+import zIndex from '@mui/material/styles/zIndex';
 
 const Column = ({ column, subCards, onAddSubCard }) => {
   return (
@@ -16,12 +17,14 @@ const Column = ({ column, subCards, onAddSubCard }) => {
       alignItems: 'center',
       height: '80vh', // Fixed height
       overflowY: 'auto', // Enable vertical scrolling
-      // position: 'relative', // Ensure columns are positioned in a stacking context
-      zIndex: 1000 , // Bring it to the front when dragging
+      position: 'relative', // Ensure columns are positioned in a stacking context
+      zIndex: 1, /* Đảm bảo các cột có z-index thấp hơn subtask khi kéo */
+
     }}>
       <h2>{column.name}</h2>
       {Object.values(column.cards).map((card) => (
         <Card
+        style={{zIndex:1}}
           key={card.id}
           card={card}
           subCards={subCards}

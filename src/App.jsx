@@ -1,9 +1,10 @@
 // App.jsx
 import React, { useState } from 'react';
-import { DndContext , DragOverlay  } from '@dnd-kit/core';
+import { DndContext , DragOverlay   } from '@dnd-kit/core';
 import Column from './components/Column';
 import { useDraggable } from '@dnd-kit/core';
-
+import { moveSubcard } from './store/tasksSlice';
+ 
 const initialData = {
   columns: {
     'column-1': {
@@ -97,7 +98,21 @@ const App = () => {
   const [data, setData] = useState(initialData);
   const { attributes, listeners, setNodeRef, transform,transition, isDragging  } = useDraggable({
   });
+  const [content, setContent] = useState('');
+  const [activeSubcard, setActiveSubcard] = useState(null);
+  const [draggingSubcard, setDraggingSubcard] = useState(null);
 
+  const handleDragStart = (event) => {
+    const { active } = event;
+    setActiveSubcard(active.data.current);
+    setDraggingSubcard(active.data.current);
+
+  };
+  const handleSubmit = () => {
+    if (content) {
+      onAddSubCard(content);
+    }
+  };
   const handleDragEnd = (event) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
@@ -130,6 +145,11 @@ const App = () => {
 
       return updatedData;
     });
+
+    setActiveSubcard(null);
+    setDraggingSubcard(null);
+
+
   };
 
   const handleAddSubCard = (cardId, content) => {
@@ -146,12 +166,10 @@ const App = () => {
   
   
   return (
-    <DndContext onDragEnd={handleDragEnd}>
-      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex: 1000, transform: transform
-      ? `translate(${transform.x}px, ${transform.y}px)`
-      : undefined,}}>
+    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex:1}}>
         {Object.values(data.columns).map((column) => (
-          <Column 
+          <Column style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex:1}}
             key={column.id}
             column={column}
             subCards={data.subCards}
@@ -159,6 +177,14 @@ const App = () => {
           />
         ))}
       </div>
+      <DragOverlay>
+        {draggingSubcard ? (
+          <div
+style={{ }}          >
+            {draggingSubcard.content}
+          </div>
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 };
