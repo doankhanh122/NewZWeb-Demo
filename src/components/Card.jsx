@@ -22,7 +22,7 @@ const Card = ({ card, subCards, onAddSubCard, isLastCard }) => {
         borderRadius: '8px',
         marginBottom: '16px',
         backgroundColor: '#fff',
-        width: '100%',
+        width: '500px',
       }}
     >
       <h3 style={{ marginBottom: '8px' }}>{card.name}</h3>
