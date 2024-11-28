@@ -40,3 +40,34 @@
 .read-the-docs {
   color: #888;
 }
+/* App CSS */
+body {
+  position: relative; /* Ensure elements with absolute positioning are relative to the body */
+}
+
+
+/* app.css */
+
+/* Styles for subcards during drag */
+.subcard {
+  background: #f9f9f9;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 8px;
+  text-align: center;
+  cursor: grab;
+  transition: transform 0.3s ease;
+}
+
+.subcard.is-dragging {
+  background: #e0f7fa;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  z-index: 9999;
+}
+
+.subcard.hovered {
+  background-color: #d1e7ff;
+}
+
+/* Optionally add more styles */
