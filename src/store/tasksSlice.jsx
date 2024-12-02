@@ -76,9 +76,26 @@ const tasksSlice = createSlice({
       // Add the subcard to the target card
       targetCard.subcards.push(subcard);
     },
-    
+    setPosition: (state, action) => {
+      const { id, x, y } = action.payload;
+      if (state.subCards[id]) {
+        state.subCards[id] = { ...state.subCards[id], x, y };
+      }
+    },
+    setPlaceholderPosition: (state, action) => {
+      state.placeholderPosition = action.payload;
+    },
+    clearPlaceholderPosition: (state) => {
+      state.placeholderPosition = null;
+    },
+    setPlaceholder: (state, action) => {
+      state.placeholder = action.payload; // Store the ID of the hovered subCard
+    },
+    clearPlaceholder: (state) => {
+      state.placeholder = null; // Clear the placeholder
+    },
   },
 });
 
-export const { addSubcard, moveSubcard } = tasksSlice.actions;
+export const { addSubcard, moveSubcard , setPosition , setPlaceholderPosition, clearPlaceholderPosition , setPlaceholder , clearPlaceholder } = tasksSlice.actions;
 export default tasksSlice.reducer;

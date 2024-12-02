@@ -1,188 +1,254 @@
-// App.jsx
-import React, { useState , useRef, useEffect} from 'react';
-import { DndContext , DragOverlay   } from '@dnd-kit/core';
-import Column from './components/Column';
-import { useDraggable } from '@dnd-kit/core';
-import { moveSubcard } from './store/tasksSlice';
+import React, { useState } from "react";
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  useSensor,
+  useSensors,
+  PointerSensor,
+} from "@dnd-kit/core";
+import Column from "./Column"; // Import Column component
+import Item from "./Item"; // Import Item component
 
-const initialData = {
-  columns: {
-    'column-1': {
-      id: 'column-1',
-      name: 'Giao Việc',
-      color: '#007BFF',
-      cards: {
-        'card-1': {
-          id: 'card-1',
-          name: 'ThuyTT',
-          subCards: ['sub-1', 'sub-2'],
-        },
-        'card-2': {
-          id: 'card-2',
-          name: 'HuyenNTT',
-          subCards: ['sub-3', 'sub-4'],
-        },
-        'card-3': {
-          id: 'card-3',
-          name: 'HoanND',
-          subCards: ['sub-5', 'sub-6'],
-        },
-      },
-    },
-    'column-2': {
-      id: 'column-2',
-      name: 'Việc Của Tôi',
-      color: '#FFD700',
-      cards: {
-        'card-4': {
-          id: 'card-4',
-          name: 'Done',
-          subCards: ['sub-7', 'sub-8'],
-        },
-        'card-5': {
-          id: 'card-5',
-          name: 'In Progress',
-          subCards: ['sub-9', 'sub-10'],
-        },
-        'card-6': {
-          id: 'card-6',
-          name: 'To do',
-          subCards: ['sub-11', 'sub-12'],
-        },
-      },
-    },
-    'column-3': {
-      id: 'column-3',
-      name: 'Xin Ý Kiến',
-      color: '#FF6347',
-      cards: {
-        'card-7': {
-          id: 'card-7',
-          name: 'Trình Tổng Giám Đốc',
-          subCards: ['sub-13', 'sub-14'],
-        },
-        'card-8': {
-          id: 'card-8',
-          name: 'Trình Trưởng phòng',
-          subCards: ['sub-15', 'sub-16'],
-        },
-        'card-9': {
-          id: 'card-9',
-          name: 'Trình Phó phòng',
-          subCards: ['sub-17', 'sub-18'],
-        },
-      },
-    },
-  },
-  subCards: {
-    'sub-1': { id: 'sub-1', content: 'Task 1' },
-    'sub-2': { id: 'sub-2', content: 'Task 2' },
-    'sub-3': { id: 'sub-3', content: 'Task 3' },
-    'sub-4': { id: 'sub-4', content: 'Task 4' },
-    'sub-5': { id: 'sub-5', content: 'Task 1' },
-    'sub-6': { id: 'sub-6', content: 'Task 2' },
-    'sub-7': { id: 'sub-8', content: 'Task 3' },
-    'sub-9': { id: 'sub-9', content: 'Task 4' },
-    'sub-10': { id: 'sub-10', content: 'Task 1' },
-    'sub-11': { id: 'sub-11', content: 'Task 2' },
-    'sub-12': { id: 'sub-12', content: 'Task 3' },
-    'sub-13': { id: 'sub-13', content: 'Task 4' },
-    'sub-14': { id: 'sub-14', content: 'Task 1' },
-    'sub-15': { id: 'sub-15', content: 'Task 2' },
-    'sub-16': { id: 'sub-16', content: 'Task 3' },
-    'sub-17': { id: 'sub-17', content: 'Task 4' }
-  },
+// Define defaultItems
+const defaultItems = {
+  giaoViec: [
+    ["item1", "item2", "item3"],
+    ["item4", "item5", "item6"],
+    ["item7", "item8", "item9"],
+  ],
+  viecCuaToi: [
+    ["item10", "item11", "item12"],
+    ["item13", "item14", "item15"],
+    ["item16", "item17", "item18"],
+  ],
+  xinYKien: [
+    ["item19", "item20", "item21"],
+    ["item22", "item23", "item24"],
+    ["item25", "item26", "item27"],
+  ],
 };
 
-const App = () => {
-  const [data, setData] = useState(initialData);
-  const { attributes, listeners, setNodeRef, transform,transition, isDragging  } = useDraggable({
-  });
-  const [content, setContent] = useState('');
-  const [activeSubcard, setActiveSubcard] = useState(null);
-  const [draggingSubcard, setDraggingSubcard] = useState(null);
+const wrapperStyle = {
+  display: "flex",
+  justifyContent: "center",
+  gap: "20px",
+};
 
-  const containerNodeRef = useRef(null);
-  const cursorRef = useRef(null)
-
-  const handleDragStart = (event) => {
-    const { active } = event;
-    setActiveSubcard(active.data.current);
-    setDraggingSubcard(active.data.current);
-
-  };
-  const handleSubmit = () => {
-    if (content) {
-      onAddSubCard(content);
-    }
-  };
-  const handleDragEnd = (event) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-    
-    let sourceCardId, targetCardId;
-
-    Object.values(data.columns).forEach((column) => {
-      Object.values(column.cards).forEach((card) => {
-        if (card.subCards.includes(active.id)) sourceCardId = card.id;
-        if (card.id === over.id) targetCardId = card.id;
-      });
-    });
-
-    if (!sourceCardId || !targetCardId) return;
-
-    setData((prev) => {
-      const updatedData = { ...prev };
-      const sourceCard = Object.values(updatedData.columns)
-        .flatMap((col) => Object.values(col.cards))
-        .find((card) => card.id === sourceCardId);
-
-      const targetCard = Object.values(updatedData.columns)
-        .flatMap((col) => Object.values(col.cards))
-        .find((card) => card.id === targetCardId);
-
-      sourceCard.subCards = sourceCard.subCards.filter(
-        (subCardId) => subCardId !== active.id
-      );
-      targetCard.subCards.push(active.id);
-
-      return updatedData;
-    });
-
-    setActiveSubcard(null);
-    setDraggingSubcard(null);
-
-
-  };
-
-  const handleAddSubCard = (cardId, content) => {
-    setData((prev) => {
-      const updatedData = { ...prev };
-      const newSubCardId = `sub-${Date.now()}`;
-      updatedData.subCards[newSubCardId] = { id: newSubCardId, content };
-      const middleColumn = updatedData.columns['column-2'];
-      const lastCardId = Object.keys(middleColumn.cards).slice(-1)[0];
-      middleColumn.cards[lastCardId].subCards.push(newSubCardId);
-      return updatedData;
-    });
-  };
-  return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} options={{ enableTouchEvents: false, enableMouseEvents: true }}>
-      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex:1, width: window.innerWidth, 
-        height: window.innerHeight}}       >
-                
-        {Object.values(data.columns).map((column) => (
-          <Column style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex:1}}
-            key={column.id}
-            column={column}
-            subCards={data.subCards}
-            onAddSubCard={column.id === 'column-2' ? handleAddSubCard : null}
-          />
-        ))}
-      </div>
-      
-    </DndContext>
+export default function App() {
+  const [items, setItems] = useState(defaultItems);
+  const [activeId, setActiveId] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [newItemContent, setNewItemContent] = useState('');
+  const sensors = useSensors(
+    useSensor(PointerSensor)
   );
+
+  function handleDragStart(event) {
+    const { active } = event;
+    setActiveId(active.id);
+  }
+
+  function handleDragOver(event) {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    const activeContainer = findContainer(activeId);
+    const overContainer = findContainer(overId);
+
+    if (!activeContainer || !overContainer || activeContainer === overContainer) return;
+
+    setItems((prev) => {
+      const activeItems = [...prev[activeContainer]];
+      const overItems = [...prev[overContainer]];
+
+      const activeIndex = activeItems.findIndex((row) =>
+        row.includes(activeId)
+      );
+      const overIndex = overItems.findIndex((row) =>
+        row.includes(overId)
+      );
+
+      if (activeIndex !== -1) {
+        const [movedItem] = activeItems[activeIndex].filter(
+          (item) => item === activeId
+        );
+
+        activeItems[activeIndex] = activeItems[activeIndex].filter(
+          (item) => item !== activeId
+        );
+
+        overItems[overIndex] = [...overItems[overIndex], movedItem];
+      }
+
+      return {
+        ...prev,
+        [activeContainer]: activeItems,
+        [overContainer]: overItems,
+      };
+    });
+  }
+
+  function handleDragEnd(event) {
+    const { active, over } = event;
+    if (!over) {
+      setActiveId(null);
+      return;
+    }
+
+    const activeId = active.id;
+    const overId = over.id;
+
+    const activeContainer = findContainer(activeId);
+    const overContainer = findContainer(overId);
+
+    if (!activeContainer || !overContainer) {
+      setActiveId(null);
+      return;
+    }
+
+    if (activeContainer === overContainer) {
+      setItems((prev) => {
+        const containerItems = [...prev[activeContainer]];
+        const activeIndex = containerItems.findIndex((row) =>
+          row.includes(activeId)
+        );
+        const overIndex = containerItems.findIndex((row) =>
+          row.includes(overId)
+        );
+
+        if (activeIndex !== -1 && overIndex !== -1) {
+          const movedItem = containerItems[activeIndex].filter(
+            (item) => item === activeId
+          )[0];
+
+          containerItems[activeIndex] = containerItems[activeIndex].filter(
+            (item) => item !== activeId
+          );
+          containerItems[overIndex] = [...containerItems[overIndex], movedItem];
+
+          return {
+            ...prev,
+            [activeContainer]: containerItems,
+          };
+        }
+        return prev;
+      });
+    } else {
+      handleDragOver(event);
+    }
+
+    setActiveId(null);
+  }
+
+  function handleAddItem() {
+    setShowModal(true);
+  }
+
+  function handleModalClose() {
+    setShowModal(false);
+    setNewItemContent('');
+  }
+
+  function handleSaveItem() {
+    if (newItemContent.trim() === "") {
+      return; // Không thêm item nếu nội dung rỗng
+    }
+  
+    // Kiểm tra trùng lặp với item hiện có trong cột
+    const itemExists = items.viecCuaToi.some((container) =>
+      container.includes(newItemContent)
+    );
+    if (itemExists) {
+      alert("Item đã tồn tại trong cột!");
+      setNewItemContent("");
+      return;
+    }
+  
+    // Tạo ID duy nhất cho item mới
+    const newItemId = `item_${new Date().getTime()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    setItems((prev) => {
+      const updatedItems = { ...prev };
+      updatedItems.viecCuaToi[updatedItems.viecCuaToi.length - 1].push(newItemId);
+      return updatedItems;
+    });
+  
+    setShowModal(false);
+    setNewItemContent("");
+  }
+  
+
+  function findContainer(id) {
+    return Object.keys(items).find((key) =>
+      items[key].some((row) => row.includes(id))
+    );
+  }
+
+  return (
+    <div style={wrapperStyle}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        <Column id="giaoViec" title="Giao Việc" items={items.giaoViec} />
+        
+        {/* Cột "Việc Của Tôi" có nút Thêm Item */}
+        <Column id="viecCuaToi" title="Việc Của Tôi" items={items.viecCuaToi}>
+          <div style={{ textAlign: "center", marginTop: 20 }}>
+            <button onClick={handleAddItem}>Thêm Item</button>
+          </div>
+        </Column>
+        
+        <Column id="xinYKien" title="Xin Ý Kiến" items={items.xinYKien} />
+        
+        <DragOverlay>{activeId ? <Item id={activeId} /> : null}</DragOverlay>
+      </DndContext>
+
+      {/* Modal thêm item */}
+      {showModal && (
+        <div style={modalStyle}>
+          <div style={modalContentStyle}>
+            <h3>Nhập nội dung item</h3>
+            <input
+              type="text"
+              value={newItemContent}
+              onChange={(e) => setNewItemContent(e.target.value)}
+            />
+            <div>
+              <button onClick={handleSaveItem}>Lưu</button>
+              <button onClick={handleModalClose}>Hủy</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Modal style
+const modalStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
 };
 
-export default App;
+const modalContentStyle = {
+  backgroundColor: "white",
+  padding: "20px",
+  borderRadius: "8px",
+  width: "300px",
+  textAlign: "center",
+};
