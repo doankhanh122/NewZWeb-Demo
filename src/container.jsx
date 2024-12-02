@@ -13,12 +13,13 @@ const Container = ({ containerId, items }) => {
         marginBottom: "10px",
       }}
     >
-      <SortableContext items={items} >
-        {/* Lặp qua các item trong container và render chúng */}
-        {items.map((item) => (
-          <Item key={item} id={item} />
-        ))}
-      </SortableContext>
+      <SortableContext items={items.flat()} >
+  {items.map((item) => (
+    <Item key={item} id={item} />
+  ))}
+</SortableContext>
+
+      
     </div>
   );
 };

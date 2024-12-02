@@ -9,6 +9,7 @@ import {
 } from "@dnd-kit/core";
 import Column from "./Column"; // Import Column component
 import Item from "./Item"; // Import Item component
+import debounce from "lodash.debounce"; // Cài đặt bằng: npm install lodash.debounce
 
 // Define defaultItems
 const defaultItems = {
@@ -144,9 +145,24 @@ export default function App() {
     setActiveId(null);
   }
 
-  function handleAddItem() {
-    setShowModal(true);
-  }
+
+const handleAddItem = debounce(() => {
+  setItems((prev) => {
+    const updatedItems = { ...prev };
+    const lastContainer =
+      updatedItems.viecCuaToi[updatedItems.viecCuaToi.length - 1];
+
+    const newItemId = `item_${Date.now()}_${Math.random()
+      .toString(36)
+      .substr(2, 9)}`;
+    lastContainer.push(newItemId);
+
+    return updatedItems;
+  });
+
+  setNewItemContent("");
+}, 200); // Giới hạn sự kiện chỉ xảy ra mỗi 200ms
+
 
   function handleModalClose() {
     setShowModal(false);
@@ -155,25 +171,25 @@ export default function App() {
 
   function handleSaveItem() {
     if (newItemContent.trim() === "") {
-      return; // Không thêm item nếu nội dung rỗng
-    }
-  
-    // Kiểm tra trùng lặp với item hiện có trong cột
-    const itemExists = items.viecCuaToi.some((container) =>
-      container.includes(newItemContent)
-    );
-    if (itemExists) {
-      alert("Item đã tồn tại trong cột!");
-      setNewItemContent("");
       return;
     }
   
-    // Tạo ID duy nhất cho item mới
-    const newItemId = `item_${new Date().getTime()}_${Math.random().toString(36).substr(2, 9)}`;
-    
     setItems((prev) => {
       const updatedItems = { ...prev };
-      updatedItems.viecCuaToi[updatedItems.viecCuaToi.length - 1].push(newItemId);
+  
+      const lastContainer =
+        updatedItems.viecCuaToi[updatedItems.viecCuaToi.length - 1];
+  
+      // Đảm bảo không có item trùng lặp
+      if (lastContainer.includes(newItemContent)) {
+        alert("Item đã tồn tại!");
+        return prev;
+      }
+  
+      lastContainer.push(
+        `item_${new Date().getTime()}_${Math.random().toString(36).substr(2, 9)}`
+      );
+  
       return updatedItems;
     });
   
@@ -199,9 +215,15 @@ export default function App() {
       >
         <Column id="giaoViec" title="Giao Việc" items={items.giaoViec} />
         
-        {/* Cột "Việc Của Tôi" có nút Thêm Item */}
         <Column id="viecCuaToi" title="Việc Của Tôi" items={items.viecCuaToi}>
-          <div style={{ textAlign: "center", marginTop: 20 }}>
+          {/* Thêm ô nhập và nút thêm item */}
+          <div style={{ marginTop: "10px" }}>
+            {/* <input
+              type="text"
+              value={newItemContent}
+              // onChange={(e) => setNewItemContent(e.target.value)}
+              placeholder="Nhập nội dung..."
+            /> */}
             <button onClick={handleAddItem}>Thêm Item</button>
           </div>
         </Column>
@@ -210,45 +232,7 @@ export default function App() {
         
         <DragOverlay>{activeId ? <Item id={activeId} /> : null}</DragOverlay>
       </DndContext>
-
-      {/* Modal thêm item */}
-      {showModal && (
-        <div style={modalStyle}>
-          <div style={modalContentStyle}>
-            <h3>Nhập nội dung item</h3>
-            <input
-              type="text"
-              value={newItemContent}
-              onChange={(e) => setNewItemContent(e.target.value)}
-            />
-            <div>
-              <button onClick={handleSaveItem}>Lưu</button>
-              <button onClick={handleModalClose}>Hủy</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-// Modal style
-const modalStyle = {
-  position: "fixed",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  backgroundColor: "rgba(0, 0, 0, 0.5)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-};
-
-const modalContentStyle = {
-  backgroundColor: "white",
-  padding: "20px",
-  borderRadius: "8px",
-  width: "300px",
-  textAlign: "center",
-};
