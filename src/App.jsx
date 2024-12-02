@@ -224,7 +224,7 @@ const handleAddItem = debounce(() => {
               // onChange={(e) => setNewItemContent(e.target.value)}
               placeholder="Nhập nội dung..."
             /> */}
-            <button onClick={handleAddItem}>Thêm Item</button>
+            <button onClick={handleAddItem}>+</button>
           </div>
         </Column>
         
