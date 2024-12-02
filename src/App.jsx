@@ -11,23 +11,32 @@ import Column from "./Column"; // Import Column component
 import Item from "./Item"; // Import Item component
 import debounce from "lodash.debounce"; // Cài đặt bằng: npm install lodash.debounce
 
-// Define defaultItems
+// Cấu trúc items mặc định
 const defaultItems = {
-  giaoViec: [
-    ["item1", "item2", "item3"],
-    ["item4", "item5", "item6"],
-    ["item7", "item8", "item9"],
-  ],
-  viecCuaToi: [
-    ["item10", "item11", "item12"],
-    ["item13", "item14", "item15"],
-    ["item16", "item17", "item18"],
-  ],
-  xinYKien: [
-    ["item19", "item20", "item21"],
-    ["item22", "item23", "item24"],
-    ["item25", "item26", "item27"],
-  ],
+  giaoViec: {
+    title: "Giao Việc",
+    containers: [
+      { id: "container1", items: ["item1", "item2", "item3"] },
+      { id: "container2", items: ["item4", "item5", "item6"] },
+      { id: "container3", items: ["item7", "item8", "item9"] },
+    ],
+  },
+  viecCuaToi: {
+    title: "Việc Của Tôi",
+    containers: [
+      { id: "container4", items: ["item10", "item11", "item12"] },
+      { id: "container5", items: ["item13", "item14", "item15"] },
+      { id: "container6", items: ["item16", "item17", "item18"] },
+    ],
+  },
+  xinYKien: {
+    title: "Xin Ý Kiến",
+    containers: [
+      { id: "container7", items: ["item19", "item20", "item21"] },
+      { id: "container8", items: ["item22", "item23", "item24"] },
+      { id: "container9", items: ["item25", "item26", "item27"] },
+    ],
+  },
 };
 
 const wrapperStyle = {
@@ -39,171 +48,90 @@ const wrapperStyle = {
 export default function App() {
   const [items, setItems] = useState(defaultItems);
   const [activeId, setActiveId] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-  const [newItemContent, setNewItemContent] = useState('');
-  const sensors = useSensors(
-    useSensor(PointerSensor)
-  );
 
-  function handleDragStart(event) {
-    const { active } = event;
-    setActiveId(active.id);
-  }
+  const sensors = useSensors(useSensor(PointerSensor));
 
-  function handleDragOver(event) {
+  // Tìm container chứa một item theo ID
+  const findContainer = (id) => {
+    for (const [key, data] of Object.entries(items)) {
+      for (const container of data.containers) {
+        if (container.items.includes(id)) {
+          return { key, container };
+        }
+      }
+    }
+    return null;
+  };
+
+  const handleDragStart = (event) => {
+    setActiveId(event.active.id);
+  };
+
+  const handleDragOver = (event) => {
     const { active, over } = event;
     if (!over) return;
 
-    const activeId = active.id;
-    const overId = over.id;
+    const activeData = findContainer(active.id);
+    const overData = findContainer(over.id);
 
-    const activeContainer = findContainer(activeId);
-    const overContainer = findContainer(overId);
+    if (!activeData || !overData) return;
 
-    if (!activeContainer || !overContainer || activeContainer === overContainer) return;
-
-    setItems((prev) => {
-      const activeItems = [...prev[activeContainer]];
-      const overItems = [...prev[overContainer]];
-
-      const activeIndex = activeItems.findIndex((row) =>
-        row.includes(activeId)
-      );
-      const overIndex = overItems.findIndex((row) =>
-        row.includes(overId)
-      );
-
-      if (activeIndex !== -1) {
-        const [movedItem] = activeItems[activeIndex].filter(
-          (item) => item === activeId
-        );
-
-        activeItems[activeIndex] = activeItems[activeIndex].filter(
-          (item) => item !== activeId
-        );
-
-        overItems[overIndex] = [...overItems[overIndex], movedItem];
-      }
-
-      return {
-        ...prev,
-        [activeContainer]: activeItems,
-        [overContainer]: overItems,
-      };
-    });
-  }
-
-  function handleDragEnd(event) {
-    const { active, over } = event;
-    if (!over) {
-      setActiveId(null);
-      return;
-    }
-
-    const activeId = active.id;
-    const overId = over.id;
-
-    const activeContainer = findContainer(activeId);
-    const overContainer = findContainer(overId);
-
-    if (!activeContainer || !overContainer) {
-      setActiveId(null);
-      return;
-    }
-
-    if (activeContainer === overContainer) {
+    if (activeData.container.id !== overData.container.id) {
       setItems((prev) => {
-        const containerItems = [...prev[activeContainer]];
-        const activeIndex = containerItems.findIndex((row) =>
-          row.includes(activeId)
+        const updated = { ...prev };
+
+        // Loại bỏ item từ container ban đầu
+        const activeItems = activeData.container.items.filter(
+          (item) => item !== active.id
         );
-        const overIndex = containerItems.findIndex((row) =>
-          row.includes(overId)
+
+        // Thêm item vào container mới
+        const overItems = [...overData.container.items, active.id];
+
+        updated[activeData.key].containers = updated[activeData.key].containers.map(
+          (container) =>
+            container.id === activeData.container.id
+              ? { ...container, items: activeItems }
+              : container
         );
 
-        if (activeIndex !== -1 && overIndex !== -1) {
-          const movedItem = containerItems[activeIndex].filter(
-            (item) => item === activeId
-          )[0];
+        updated[overData.key].containers = updated[overData.key].containers.map(
+          (container) =>
+            container.id === overData.container.id
+              ? { ...container, items: overItems }
+              : container
+        );
 
-          containerItems[activeIndex] = containerItems[activeIndex].filter(
-            (item) => item !== activeId
-          );
-          containerItems[overIndex] = [...containerItems[overIndex], movedItem];
-
-          return {
-            ...prev,
-            [activeContainer]: containerItems,
-          };
-        }
-        return prev;
+        return updated;
       });
-    } else {
-      handleDragOver(event);
     }
+  };
 
+  const handleDragEnd = () => {
     setActiveId(null);
-  }
+  };
 
-
-const handleAddItem = debounce(() => {
-  setItems((prev) => {
-    const updatedItems = { ...prev };
-    const lastContainer =
-      updatedItems.viecCuaToi[updatedItems.viecCuaToi.length - 1];
-
-    const newItemId = `item_${Date.now()}_${Math.random()
-      .toString(36)
-      .substr(2, 9)}`;
-    lastContainer.push(newItemId);
-
-    return updatedItems;
-  });
-
-  setNewItemContent("");
-}, 200); // Giới hạn sự kiện chỉ xảy ra mỗi 200ms
-
-
-  function handleModalClose() {
-    setShowModal(false);
-    setNewItemContent('');
-  }
-
-  function handleSaveItem() {
-    if (newItemContent.trim() === "") {
-      return;
-    }
-  
+  const handleAddItem = (containerId) => {
     setItems((prev) => {
       const updatedItems = { ...prev };
   
-      const lastContainer =
-        updatedItems.viecCuaToi[updatedItems.viecCuaToi.length - 1];
-  
-      // Đảm bảo không có item trùng lặp
-      if (lastContainer.includes(newItemContent)) {
-        alert("Item đã tồn tại!");
-        return prev;
-      }
-  
-      lastContainer.push(
-        `item_${new Date().getTime()}_${Math.random().toString(36).substr(2, 9)}`
+      // Tìm container trong cột "Việc Của Tôi"
+      const targetContainer = updatedItems.viecCuaToi.containers.find(
+        (container) => container.id === containerId
       );
+  
+      if (!targetContainer) return prev;
+  
+      // Tạo item mới với ID duy nhất
+      const newItemId = `item_${Date.now()}`;
+  
+      // Thêm item mới vào container
+      targetContainer.items.push(newItemId);
   
       return updatedItems;
     });
+  };
   
-    setShowModal(false);
-    setNewItemContent("");
-  }
-  
-
-  function findContainer(id) {
-    return Object.keys(items).find((key) =>
-      items[key].some((row) => row.includes(id))
-    );
-  }
-
   return (
     <div style={wrapperStyle}>
       <DndContext
@@ -213,26 +141,30 @@ const handleAddItem = debounce(() => {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <Column id="giaoViec" title="Giao Việc" items={items.giaoViec} />
-        
-        <Column id="viecCuaToi" title="Việc Của Tôi" items={items.viecCuaToi}>
-          {/* Thêm ô nhập và nút thêm item */}
-          <div style={{ marginTop: "10px" }}>
-            {/* <input
-              type="text"
-              value={newItemContent}
-              // onChange={(e) => setNewItemContent(e.target.value)}
-              placeholder="Nhập nội dung..."
-            /> */}
-            <button onClick={handleAddItem}>+</button>
-          </div>
-        </Column>
-        
-        <Column id="xinYKien" title="Xin Ý Kiến" items={items.xinYKien} />
-        
+        {Object.entries(items).map(([key, data]) => (
+          <Column
+            key={key}
+            id={key}
+            title={data.title}
+            containers={data.containers}
+          >
+            {key === "viecCuaToi" &&
+  data.containers.map((container, index) => (
+    <div key={container.id} style={{ margin: "10px 0" }}>
+      {/* Hiển thị nút Add Item chỉ ở container cuối cùng */}
+      {index === data.containers.length - 1 && (
+        <button onClick={() => handleAddItem(container.id)}>
+          + 
+        </button>
+      )}
+    </div>
+  ))}
+
+          </Column>
+        ))}
         <DragOverlay>{activeId ? <Item id={activeId} /> : null}</DragOverlay>
       </DndContext>
     </div>
   );
+  
 }
-

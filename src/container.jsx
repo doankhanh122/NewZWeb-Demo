@@ -1,6 +1,6 @@
 import React from "react";
 import { SortableContext } from "@dnd-kit/sortable";
-import Item from "./Item"; // Giả sử bạn đã có component Item
+import SortableItem from "./Item"; // Assuming you have a SortableItem component
 
 const Container = ({ containerId, items }) => {
   return (
@@ -11,15 +11,18 @@ const Container = ({ containerId, items }) => {
         borderRadius: "8px",
         padding: "10px",
         marginBottom: "10px",
+        minHeight: "50px", // To ensure visibility even when empty
       }}
     >
-      <SortableContext items={items.flat()} >
-  {items.map((item) => (
-    <Item key={item} id={item} />
-  ))}
-</SortableContext>
-
-      
+      <SortableContext items={items} id={containerId}>
+        {items.length > 0 ? (
+          items.map((item) => <SortableItem key={item} id={item} />)
+        ) : (
+          <div style={{ color: "#888", textAlign: "center" }}>
+            No items to display
+          </div>
+        )}
+      </SortableContext>
     </div>
   );
 };
