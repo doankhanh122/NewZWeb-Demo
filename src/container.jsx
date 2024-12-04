@@ -1,25 +1,30 @@
 import React from "react";
+import { useDroppable } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
-import SortableItem from "./Item"; // Assuming you have a SortableItem component
+import SortableItem from "./Item";
 
-const Container = ({ containerId, items }) => {
+const DroppableContainer = ({ containerId, items }) => {
+  const { setNodeRef, isOver } = useDroppable({
+    id: containerId,
+  });
+
   return (
     <div
+      ref={setNodeRef}
       style={{
-        backgroundColor: "#f9f9f9",
+        backgroundColor: isOver ? "#e0f7fa" : "#f9f9f9",
         border: "1px solid #ddd",
         borderRadius: "8px",
         padding: "10px",
-        marginBottom: "10px",
-        minHeight: "50px", // To ensure visibility even when empty
+        minHeight: "50px",
       }}
     >
       <SortableContext items={items} id={containerId}>
         {items.length > 0 ? (
           items.map((item) => <SortableItem key={item} id={item} />)
         ) : (
-          <div style={{ color: "#888", textAlign: "center" }}>
-            No items to display
+          <div style={{ textAlign: "center", color: "#999" }}>
+            Drag items here
           </div>
         )}
       </SortableContext>
@@ -27,4 +32,4 @@ const Container = ({ containerId, items }) => {
   );
 };
 
-export default Container;
+export default DroppableContainer;

@@ -1,5 +1,5 @@
 import React from "react";
-import Container from "./container"; // Import Container component
+import DroppableContainer from "./container"; // Import Container component
 
 export default function Column({ id, title, containers = [], children }) {
   // Validation for props
@@ -22,7 +22,7 @@ export default function Column({ id, title, containers = [], children }) {
       <h3 style={{ textAlign: "center" }}>{title}</h3>
       {containers.length > 0 ? (
         containers.map((container, containerIndex) => (
-          <Container
+          <DroppableContainer
             key={containerIndex}
             containerId={container.id || `container-${containerIndex}`}
             items={container.items || []}

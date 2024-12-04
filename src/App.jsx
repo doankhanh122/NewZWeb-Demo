@@ -48,6 +48,7 @@ const wrapperStyle = {
 export default function App() {
   const [items, setItems] = useState(defaultItems);
   const [activeId, setActiveId] = useState(null);
+  const [containers, setContainers] = useState(defaultItems);
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -107,10 +108,62 @@ export default function App() {
     }
   };
 
-  const handleDragEnd = () => {
-    setActiveId(null);
+  const handleDragEnd = (event) => {
+    const { active, over } = event;
+  
+    if (!active || !over) return;
+  
+    const activeContainerId = active.data.current.sortable.containerId;
+    const overContainerId = over.id;
+  
+    if (activeContainerId !== overContainerId) {
+      setItems((prev) => {
+        // Tìm nhóm chứa `activeContainerId` và `overContainerId`
+        let activeGroupKey, overGroupKey;
+        Object.entries(prev).forEach(([groupKey, group]) => {
+          group.containers.forEach((container) => {
+            if (container.id === activeContainerId) activeGroupKey = groupKey;
+            if (container.id === overContainerId) overGroupKey = groupKey;
+          });
+        });
+  
+        if (!activeGroupKey || !overGroupKey) return prev;
+  
+        // Lấy container tương ứng
+        const activeGroup = prev[activeGroupKey];
+        const overGroup = prev[overGroupKey];
+        const activeContainer = activeGroup.containers.find(
+          (container) => container.id === activeContainerId
+        );
+        const overContainer = overGroup.containers.find(
+          (container) => container.id === overContainerId
+        );
+  
+        if (!activeContainer || !overContainer) return prev;
+  
+        // Di chuyển item
+        const itemIndex = activeContainer.items.indexOf(active.id);
+        if (itemIndex === -1) return prev;
+  
+        const [movedItem] = activeContainer.items.splice(itemIndex, 1);
+        overContainer.items.push(movedItem);
+  
+        // Trả về trạng thái mới
+        return {
+          ...prev,
+          [activeGroupKey]: {
+            ...activeGroup,
+            containers: [...activeGroup.containers],
+          },
+          [overGroupKey]: {
+            ...overGroup,
+            containers: [...overGroup.containers],
+          },
+        };
+      });
+    }
   };
-
+  
   const handleAddItem = (containerId) => {
     setItems((prev) => {
       const updatedItems = { ...prev };
