@@ -1,188 +1,223 @@
-// App.jsx
-import React, { useState , useRef, useEffect} from 'react';
-import { DndContext , DragOverlay   } from '@dnd-kit/core';
-import Column from './components/Column';
-import { useDraggable } from '@dnd-kit/core';
-import { moveSubcard } from './store/tasksSlice';
+import React, { useState } from "react";
+import {
+  DndContext,
+  DragOverlay,
+  closestCorners,
+  useSensor,
+  useSensors,
+  PointerSensor,
+} from "@dnd-kit/core";
+import Column from "./Column"; // Import Column component
+import Item from "./Item"; // Import Item component
+import debounce from "lodash.debounce"; // Cài đặt bằng: npm install lodash.debounce
 
-const initialData = {
-  columns: {
-    'column-1': {
-      id: 'column-1',
-      name: 'Giao Việc',
-      color: '#007BFF',
-      cards: {
-        'card-1': {
-          id: 'card-1',
-          name: 'ThuyTT',
-          subCards: ['sub-1', 'sub-2'],
-        },
-        'card-2': {
-          id: 'card-2',
-          name: 'HuyenNTT',
-          subCards: ['sub-3', 'sub-4'],
-        },
-        'card-3': {
-          id: 'card-3',
-          name: 'HoanND',
-          subCards: ['sub-5', 'sub-6'],
-        },
-      },
-    },
-    'column-2': {
-      id: 'column-2',
-      name: 'Việc Của Tôi',
-      color: '#FFD700',
-      cards: {
-        'card-4': {
-          id: 'card-4',
-          name: 'Done',
-          subCards: ['sub-7', 'sub-8'],
-        },
-        'card-5': {
-          id: 'card-5',
-          name: 'In Progress',
-          subCards: ['sub-9', 'sub-10'],
-        },
-        'card-6': {
-          id: 'card-6',
-          name: 'To do',
-          subCards: ['sub-11', 'sub-12'],
-        },
-      },
-    },
-    'column-3': {
-      id: 'column-3',
-      name: 'Xin Ý Kiến',
-      color: '#FF6347',
-      cards: {
-        'card-7': {
-          id: 'card-7',
-          name: 'Trình Tổng Giám Đốc',
-          subCards: ['sub-13', 'sub-14'],
-        },
-        'card-8': {
-          id: 'card-8',
-          name: 'Trình Trưởng phòng',
-          subCards: ['sub-15', 'sub-16'],
-        },
-        'card-9': {
-          id: 'card-9',
-          name: 'Trình Phó phòng',
-          subCards: ['sub-17', 'sub-18'],
-        },
-      },
-    },
+// Cấu trúc items mặc định
+const defaultItems = {
+  giaoViec: {
+    title: "Giao Việc",
+    containers: [
+      { id: "container1", items: ["item1", "item2", "item3"] },
+      { id: "container2", items: ["item4", "item5", "item6"] },
+      { id: "container3", items: ["item7", "item8", "item9"] },
+    ],
   },
-  subCards: {
-    'sub-1': { id: 'sub-1', content: 'Task 1' },
-    'sub-2': { id: 'sub-2', content: 'Task 2' },
-    'sub-3': { id: 'sub-3', content: 'Task 3' },
-    'sub-4': { id: 'sub-4', content: 'Task 4' },
-    'sub-5': { id: 'sub-5', content: 'Task 1' },
-    'sub-6': { id: 'sub-6', content: 'Task 2' },
-    'sub-7': { id: 'sub-8', content: 'Task 3' },
-    'sub-9': { id: 'sub-9', content: 'Task 4' },
-    'sub-10': { id: 'sub-10', content: 'Task 1' },
-    'sub-11': { id: 'sub-11', content: 'Task 2' },
-    'sub-12': { id: 'sub-12', content: 'Task 3' },
-    'sub-13': { id: 'sub-13', content: 'Task 4' },
-    'sub-14': { id: 'sub-14', content: 'Task 1' },
-    'sub-15': { id: 'sub-15', content: 'Task 2' },
-    'sub-16': { id: 'sub-16', content: 'Task 3' },
-    'sub-17': { id: 'sub-17', content: 'Task 4' }
+  viecCuaToi: {
+    title: "Việc Của Tôi",
+    containers: [
+      { id: "container4", items: ["item10", "item11", "item12"] },
+      { id: "container5", items: ["item13", "item14", "item15"] },
+      { id: "container6", items: ["item16", "item17", "item18"] },
+    ],
+  },
+  xinYKien: {
+    title: "Xin Ý Kiến",
+    containers: [
+      { id: "container7", items: ["item19", "item20", "item21"] },
+      { id: "container8", items: ["item22", "item23", "item24"] },
+      { id: "container9", items: ["item25", "item26", "item27"] },
+    ],
   },
 };
 
-const App = () => {
-  const [data, setData] = useState(initialData);
-  const { attributes, listeners, setNodeRef, transform,transition, isDragging  } = useDraggable({
-  });
-  const [content, setContent] = useState('');
-  const [activeSubcard, setActiveSubcard] = useState(null);
-  const [draggingSubcard, setDraggingSubcard] = useState(null);
+const wrapperStyle = {
+  display: "flex",
+  justifyContent: "center",
+  gap: "20px",
+};
 
-  const containerNodeRef = useRef(null);
-  const cursorRef = useRef(null)
+export default function App() {
+  const [items, setItems] = useState(defaultItems);
+  const [activeId, setActiveId] = useState(null);
+  const [containers, setContainers] = useState(defaultItems);
+
+  const sensors = useSensors(useSensor(PointerSensor));
+
+  // Tìm container chứa một item theo ID
+  const findContainer = (id) => {
+    for (const [key, data] of Object.entries(items)) {
+      for (const container of data.containers) {
+        if (container.items.includes(id)) {
+          return { key, container };
+        }
+      }
+    }
+    return null;
+  };
 
   const handleDragStart = (event) => {
-    const { active } = event;
-    setActiveSubcard(active.data.current);
-    setDraggingSubcard(active.data.current);
-
+    setActiveId(event.active.id);
   };
-  const handleSubmit = () => {
-    if (content) {
-      onAddSubCard(content);
+
+  const handleDragOver = (event) => {
+    const { active, over } = event;
+    if (!over) return;
+
+    const activeData = findContainer(active.id);
+    const overData = findContainer(over.id);
+
+    if (!activeData || !overData) return;
+
+    if (activeData.container.id !== overData.container.id) {
+      setItems((prev) => {
+        const updated = { ...prev };
+
+        // Loại bỏ item từ container ban đầu
+        const activeItems = activeData.container.items.filter(
+          (item) => item !== active.id
+        );
+
+        // Thêm item vào container mới
+        const overItems = [...overData.container.items, active.id];
+
+        updated[activeData.key].containers = updated[activeData.key].containers.map(
+          (container) =>
+            container.id === activeData.container.id
+              ? { ...container, items: activeItems }
+              : container
+        );
+
+        updated[overData.key].containers = updated[overData.key].containers.map(
+          (container) =>
+            container.id === overData.container.id
+              ? { ...container, items: overItems }
+              : container
+        );
+
+        return updated;
+      });
     }
   };
+
   const handleDragEnd = (event) => {
     const { active, over } = event;
-    if (!over || active.id === over.id) return;
-    
-    let sourceCardId, targetCardId;
-
-    Object.values(data.columns).forEach((column) => {
-      Object.values(column.cards).forEach((card) => {
-        if (card.subCards.includes(active.id)) sourceCardId = card.id;
-        if (card.id === over.id) targetCardId = card.id;
+  
+    if (!active || !over) return;
+  
+    const activeContainerId = active.data.current.sortable.containerId;
+    const overContainerId = over.id;
+  
+    if (activeContainerId !== overContainerId) {
+      setItems((prev) => {
+        // Tìm nhóm chứa `activeContainerId` và `overContainerId`
+        let activeGroupKey, overGroupKey;
+        Object.entries(prev).forEach(([groupKey, group]) => {
+          group.containers.forEach((container) => {
+            if (container.id === activeContainerId) activeGroupKey = groupKey;
+            if (container.id === overContainerId) overGroupKey = groupKey;
+          });
+        });
+  
+        if (!activeGroupKey || !overGroupKey) return prev;
+  
+        // Lấy container tương ứng
+        const activeGroup = prev[activeGroupKey];
+        const overGroup = prev[overGroupKey];
+        const activeContainer = activeGroup.containers.find(
+          (container) => container.id === activeContainerId
+        );
+        const overContainer = overGroup.containers.find(
+          (container) => container.id === overContainerId
+        );
+  
+        if (!activeContainer || !overContainer) return prev;
+  
+        // Di chuyển item
+        const itemIndex = activeContainer.items.indexOf(active.id);
+        if (itemIndex === -1) return prev;
+  
+        const [movedItem] = activeContainer.items.splice(itemIndex, 1);
+        overContainer.items.push(movedItem);
+  
+        // Trả về trạng thái mới
+        return {
+          ...prev,
+          [activeGroupKey]: {
+            ...activeGroup,
+            containers: [...activeGroup.containers],
+          },
+          [overGroupKey]: {
+            ...overGroup,
+            containers: [...overGroup.containers],
+          },
+        };
       });
-    });
-
-    if (!sourceCardId || !targetCardId) return;
-
-    setData((prev) => {
-      const updatedData = { ...prev };
-      const sourceCard = Object.values(updatedData.columns)
-        .flatMap((col) => Object.values(col.cards))
-        .find((card) => card.id === sourceCardId);
-
-      const targetCard = Object.values(updatedData.columns)
-        .flatMap((col) => Object.values(col.cards))
-        .find((card) => card.id === targetCardId);
-
-      sourceCard.subCards = sourceCard.subCards.filter(
-        (subCardId) => subCardId !== active.id
+    }
+  };
+  
+  const handleAddItem = (containerId) => {
+    setItems((prev) => {
+      const updatedItems = { ...prev };
+  
+      // Tìm container trong cột "Việc Của Tôi"
+      const targetContainer = updatedItems.viecCuaToi.containers.find(
+        (container) => container.id === containerId
       );
-      targetCard.subCards.push(active.id);
-
-      return updatedData;
-    });
-
-    setActiveSubcard(null);
-    setDraggingSubcard(null);
-
-
-  };
-
-  const handleAddSubCard = (cardId, content) => {
-    setData((prev) => {
-      const updatedData = { ...prev };
-      const newSubCardId = `sub-${Date.now()}`;
-      updatedData.subCards[newSubCardId] = { id: newSubCardId, content };
-      const middleColumn = updatedData.columns['column-2'];
-      const lastCardId = Object.keys(middleColumn.cards).slice(-1)[0];
-      middleColumn.cards[lastCardId].subCards.push(newSubCardId);
-      return updatedData;
+  
+      if (!targetContainer) return prev;
+  
+      // Tạo item mới với ID duy nhất
+      const newItemId = `item_${Date.now()}`;
+  
+      // Thêm item mới vào container
+      targetContainer.items.push(newItemId);
+  
+      return updatedItems;
     });
   };
+  
   return (
-    <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd} options={{ enableTouchEvents: false, enableMouseEvents: true }}>
-      <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex:1, width: window.innerWidth, 
-        height: window.innerHeight}}       >
-                
-        {Object.values(data.columns).map((column) => (
-          <Column style={{ display: 'flex', gap: '16px', justifyContent: 'center', zIndex:1}}
-            key={column.id}
-            column={column}
-            subCards={data.subCards}
-            onAddSubCard={column.id === 'column-2' ? handleAddSubCard : null}
-          />
-        ))}
-      </div>
-      
-    </DndContext>
-  );
-};
+    <div style={wrapperStyle}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragEnd={handleDragEnd}
+      >
+        {Object.entries(items).map(([key, data]) => (
+          <Column
+            key={key}
+            id={key}
+            title={data.title}
+            containers={data.containers}
+          >
+            {key === "viecCuaToi" &&
+  data.containers.map((container, index) => (
+    <div key={container.id} style={{ margin: "10px 0" }}>
+      {/* Hiển thị nút Add Item chỉ ở container cuối cùng */}
+      {index === data.containers.length - 1 && (
+        <button onClick={() => handleAddItem(container.id)}>
+          + 
+        </button>
+      )}
+    </div>
+  ))}
 
-export default App;
+          </Column>
+        ))}
+        <DragOverlay>{activeId ? <Item id={activeId} /> : null}</DragOverlay>
+      </DndContext>
+    </div>
+  );
+  
+}
