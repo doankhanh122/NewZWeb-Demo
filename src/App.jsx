@@ -24,9 +24,9 @@ const defaultItems = {
   viecCuaToi: {
     title: "Việc Của Tôi",
     containers: [
-      { id: "container4", title: "TODO", items: ["from LONGNT_UAT - 2024-11-28 - [Xin nghỉ phép - Trưởng đơn vị] Sẵn sàng"] },
+      { id: "container4", title: "TODO", items: ["from      LONGNT_UAT - 2024-11-28 - [Xin nghỉ phép - Trưởng đơn vị] Sẵn sàng"] },
       { id: "container5", title: "INPROGRESS", items: [] },
-      { id: "container6", title: "DONE", items: ["from LONGNT_UAT - 2024-11-26 - [Xin nghỉ phép - Trưởng đơn vị] Đã hoàn thành(Hoàn thành)", "from TUNGLS_UAT - 2024-11-26 -      [Mặc định] Đã hoàn thành(Hoàn thành)"] },
+      { id: "container6", title: "DONE", items: ["from   LONGNT_UAT - 2024-11-26 - [Xin nghỉ phép - Trưởng đơn vị] Đã hoàn thành(Hoàn thành)", "from TUNGLS_UAT - 2024-11-26 -      [Mặc định] Đã hoàn thành(Hoàn thành)"] },
     ],
   },
   xinYKien: {
