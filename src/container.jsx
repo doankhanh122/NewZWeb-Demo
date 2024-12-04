@@ -3,7 +3,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import SortableItem from "./Item";
 
-const DroppableContainer = ({ containerId, items }) => {
+const DroppableContainer = ({ containerId, items, title }) => {
   const { setNodeRef, isOver } = useDroppable({
     id: containerId,
   });
@@ -19,15 +19,28 @@ const DroppableContainer = ({ containerId, items }) => {
         minHeight: "50px",
       }}
     >
+      {/* Title Section */}
+      <div
+        style={{
+          fontWeight: "bold",
+          fontSize: "16px",
+          marginBottom: "10px",
+          color: "#333",
+        }}
+      >
+        {title}
+      </div>
       <SortableContext items={items} id={containerId}>
-        {items.length > 0 ? (
-          items.map((item) => <SortableItem key={item} id={item} />)
-        ) : (
-          <div style={{ textAlign: "center", color: "#999" }}>
-            Drag items here
-          </div>
-        )}
-      </SortableContext>
+  {items.length > 0 ? (
+    items.map((item) => (
+      <SortableItem key={`${containerId}-${item}`} id={item} />
+    ))
+  ) : (
+    <div style={{ textAlign: "center", color: "#999" }}>
+      Drag items here
+    </div>
+  )}
+</SortableContext>
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState  } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -16,25 +16,24 @@ const defaultItems = {
   giaoViec: {
     title: "Giao Việc",
     containers: [
-      { id: "container1", items: ["item1", "item2", "item3"] },
-      { id: "container2", items: ["item4", "item5", "item6"] },
-      { id: "container3", items: ["item7", "item8", "item9"] },
+      { id: "container1", title: "ANHLT_UAT", items: ["from TUNGLS_UAT - 2024-11-26 -  [Mặc định] Đã hoàn thành(Hoàn thành)", "from DUNGNTK_UAT - 2024-11-26 - [Mặc định] Đã hoàn thành(Hoàn thành)"] },
+      { id: "container2", title: "DUNGNTK_UAT", items: ["from DUNGNTK_UAT - 2024-11-26 - [Mặc định] đã quá hạn ", "from TUNGLS_UAT - 2024-11-26 - [Mặc định] Đã hoàn thành(Hoàn thành)", "from DUNGNTK_UAT - 2024-11-26 - [Mặc định] Đã hoàn thành(Hoàn thành) "] },
+      { id: "container3", title: "NHUNGPT_UAT", items: [] },
     ],
   },
   viecCuaToi: {
     title: "Việc Của Tôi",
     containers: [
-      { id: "container4", items: ["item10", "item11", "item12"] },
-      { id: "container5", items: ["item13", "item14", "item15"] },
-      { id: "container6", items: ["item16", "item17", "item18"] },
+      { id: "container4", title: "TODO", items: ["from LONGNT_UAT - 2024-11-28 - [Xin nghỉ phép - Trưởng đơn vị] Sẵn sàng"] },
+      { id: "container5", title: "INPROGRESS", items: [] },
+      { id: "container6", title: "DONE", items: ["from LONGNT_UAT - 2024-11-26 - [Xin nghỉ phép - Trưởng đơn vị] Đã hoàn thành(Hoàn thành)", "from TUNGLS_UAT - 2024-11-26 -      [Mặc định] Đã hoàn thành(Hoàn thành)"] },
     ],
   },
   xinYKien: {
     title: "Xin Ý Kiến",
     containers: [
-      { id: "container7", items: ["item19", "item20", "item21"] },
-      { id: "container8", items: ["item22", "item23", "item24"] },
-      { id: "container9", items: ["item25", "item26", "item27"] },
+      { id: "container7", title: "TỔNG GIÁM ĐỐC-TUNGLS_UAT", items: [] },
+      { id: "container8", title: "TRƯỞNG PHÒNG PHÒNG TCNS&HCTH", items: ["from LONGNT_UAT - 2024-11-26 - [Xin nghỉ phép - Trưởng đơn vị] Đã hoàn thành(Hoàn thành)"] },
     ],
   },
 };

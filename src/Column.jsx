@@ -1,5 +1,5 @@
 import React from "react";
-import DroppableContainer from "./container"; // Import Container component
+import DroppableContainer from "./container"; // Import DroppableContainer component
 
 export default function Column({ id, title, containers = [], children }) {
   // Validation for props
@@ -19,13 +19,17 @@ export default function Column({ id, title, containers = [], children }) {
         marginRight: "10px",
       }}
     >
+      {/* Render Column Title */}
       <h3 style={{ textAlign: "center" }}>{title}</h3>
+
+      {/* Render Containers */}
       {containers.length > 0 ? (
         containers.map((container, containerIndex) => (
           <DroppableContainer
             key={containerIndex}
             containerId={container.id || `container-${containerIndex}`}
             items={container.items || []}
+            title={container.title || `Untitled Container ${containerIndex + 1}`}
           />
         ))
       ) : (
@@ -33,6 +37,8 @@ export default function Column({ id, title, containers = [], children }) {
           No containers available
         </div>
       )}
+
+      {/* Render children if any */}
       {children && <div style={{ marginTop: "10px" }}>{children}</div>}
     </div>
   );
