@@ -1,6 +1,20 @@
 import React from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import {
+  Card,
+  CardHeader,
+  CardContent,
+  Typography,
+  Button,
+  IconButton,
+  Stack,
+  Avatar,
+  Tooltip,
+} from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import GroupIcon from "@mui/icons-material/Group";
+import ChatIcon from "@mui/icons-material/Chat";
 
 function SortableItem({ id }) {
   const {
@@ -32,7 +46,68 @@ function SortableItem({ id }) {
       {...attributes} // Thuộc tính cho khả năng kéo thả
       {...listeners} // Sự kiện kéo thả
     >
-      {id}
+      <Card
+      
+    >
+      <CardHeader
+        avatar={
+          <Avatar sx={{ bgcolor: "#607d8b" }}>
+            
+          </Avatar>
+        }
+        action={
+          <IconButton>
+            <MoreVertIcon />
+          </IconButton>
+        }
+      />
+      <Button
+        variant="contained"
+        sx={{
+          backgroundColor: "#d1f0d1",
+          color: "#4caf50",
+          fontSize: "10px",
+          textTransform: "uppercase",
+          margin: "0 16px",
+          borderRadius: 2,
+        }}
+      >
+        Request Review
+      </Button>
+      <CardContent>
+        <Typography
+          variant="body2"
+          sx={{ fontStyle: "italic", color: "#757575" }}
+        >
+         
+        </Typography>
+        <Typography variant="body2" sx={{ marginTop: 1 }}>
+          
+        </Typography>
+        <Typography variant="body2">
+          <strong>TaskID:</strong> 
+        </Typography>
+        <Typography variant="body2">
+          <strong>CARDID:</strong> 
+        </Typography>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{ marginTop: 2 }}
+        >
+          <Tooltip title="Group">
+            <IconButton>
+              <GroupIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Chat">
+            <IconButton>
+              <ChatIcon />
+            </IconButton>
+          </Tooltip>
+        </Stack>
+      </CardContent>
+    </Card>
     </div>
   );
 }

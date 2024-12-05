@@ -16,7 +16,9 @@ const DroppableContainer = ({ containerId, items, title }) => {
         border: "1px solid #ddd",
         borderRadius: "8px",
         padding: "10px",
-        minHeight: "50px",
+        minHeight: "40px",
+        overflowY:"auto",
+        marginBottom:"10px",
       }}
     >
       {/* Title Section */}
